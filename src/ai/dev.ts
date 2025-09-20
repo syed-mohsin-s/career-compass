@@ -15,5 +15,6 @@ import '@/ai로우/skill-gap-analysis.ts';
 import '@/ai로우/career-path-recommendations.ts';
 import '@/aiロウ/learning-resource-aggregation.ts';
 import '@/aiロウ/analyze-skills.ts';
+import '@/ai/flows/generate-job-skill-graph.ts';
 
     

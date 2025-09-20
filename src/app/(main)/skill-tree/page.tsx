@@ -25,10 +25,12 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from '@/components/ui/label';
 
 import { useUserProfileStore } from '@/store/user-profile';
 import useStore from '@/hooks/use-store';
-import { generateSkillGraph, GenerateSkillGraphOutput } from '@/ai/flows/generate-skill-graph';
+import { generateJobSkillGraph, GenerateJobSkillGraphOutput } from '@/ai/flows/generate-job-skill-graph';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -38,11 +40,13 @@ const trendingRoles = [
   'Cybersecurity Analyst',
   'Cloud Engineer',
   'UX/UI Designer',
+  'Software Engineer',
+  'Product Manager'
 ];
 
 const chartConfig = {
   value: {
-    label: 'Proficiency',
+    label: 'Importance',
     color: 'hsl(var(--chart-1))',
   },
 };
@@ -50,21 +54,19 @@ const chartConfig = {
 export default function SkillTreePage() {
   const { toast } = useToast();
   const profile = useStore(useUserProfileStore, (state) => state.profile);
-  const skillGraph = useStore(useUserProfileStore, (state) => state.skillGraph);
-  const setSkillGraph = useUserProfileStore((state) => state.setSkillGraph);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>(trendingRoles[0]);
+  const [skillGraph, setSkillGraph] = useState<GenerateJobSkillGraphOutput | null>(null);
 
   useEffect(() => {
     const fetchSkillGraph = async () => {
-      if (profile && !skillGraph) {
+      if (selectedRole) {
         setIsLoading(true);
+        setSkillGraph(null);
         try {
-          const graphData = await generateSkillGraph({
-            skills: profile.skills.split(','),
-            education: profile.education,
-            interests: profile.interests,
-            workExperience: profile.experience,
+          const graphData = await generateJobSkillGraph({
+            jobRole: selectedRole
           });
           setSkillGraph(graphData);
         } catch (error) {
@@ -72,7 +74,7 @@ export default function SkillTreePage() {
           toast({
             variant: 'destructive',
             title: 'Error',
-            description: 'Could not generate your skill graph. Please try again.',
+            description: `Could not generate the skill graph for ${selectedRole}. Please try again.`,
           });
         } finally {
           setIsLoading(false);
@@ -81,7 +83,7 @@ export default function SkillTreePage() {
     };
 
     fetchSkillGraph();
-  }, [profile, skillGraph, setSkillGraph, toast]);
+  }, [selectedRole, toast]);
 
   const userSkills = profile?.skills?.split(',').map((s) => s.trim()) || [];
 
@@ -92,51 +94,63 @@ export default function SkillTreePage() {
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
               <GitGraph />
-              Skill Tree Visualization
+              Job Role Skill Requirements
             </CardTitle>
             <CardDescription>
-              A visual representation of your skills based on your profile.
+              A visual representation of the key skills required for different job roles.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            {isLoading && (
-              <div className="w-full aspect-video bg-muted rounded-lg flex flex-col items-center justify-center text-center p-4">
-                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-                 <h3 className="font-bold text-lg mb-2">Generating Your Skill Graph...</h3>
-              </div>
-            )}
-            {!isLoading && !skillGraph && (
-               <div className="w-full aspect-video bg-muted rounded-lg flex flex-col items-center justify-center text-center p-4">
-                 <Info className="h-8 w-8 text-muted-foreground mb-4" />
-                 <h3 className="font-bold text-lg mb-2">No Skill Data</h3>
-                 <p className="text-muted-foreground mb-4">Please complete your profile to generate your skill graph.</p>
-                 <Button asChild>
-                    <Link href="/skill-profile">Complete Profile</Link>
-                 </Button>
-              </div>
-            )}
-            {skillGraph && (
-              <ChartContainer config={chartConfig} className="w-full aspect-video">
-                <ResponsiveContainer>
-                  <RadarChart data={skillGraph.skillGraphData}>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent />}
-                    />
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                    <Radar
-                      name="Proficiency"
-                      dataKey="value"
-                      stroke="hsl(var(--chart-1))"
-                      fill="hsl(var(--chart-1))"
-                      fillOpacity={0.6}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            )}
+          <CardContent className="space-y-4">
+             <div className="max-w-xs space-y-2">
+                <Label>Select a Job Role</Label>
+                <Select value={selectedRole} onValueChange={setSelectedRole}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {trendingRoles.map(role => (
+                      <SelectItem key={role} value={role}>{role}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+            </div>
+            <div className="w-full aspect-video flex items-center justify-center">
+              {isLoading && (
+                <div className="w-full h-full bg-muted rounded-lg flex flex-col items-center justify-center text-center p-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+                  <h3 className="font-bold text-lg mb-2">Generating Skill Graph for {selectedRole}...</h3>
+                </div>
+              )}
+              {!isLoading && !skillGraph && (
+                 <div className="w-full h-full bg-muted rounded-lg flex flex-col items-center justify-center text-center p-4">
+                   <Info className="h-8 w-8 text-muted-foreground mb-4" />
+                   <h3 className="font-bold text-lg mb-2">No Skill Data</h3>
+                   <p className="text-muted-foreground mb-4">Select a role to generate its skill graph.</p>
+                </div>
+              )}
+              {skillGraph && (
+                <ChartContainer config={chartConfig} className="w-full h-full">
+                  <ResponsiveContainer>
+                    <RadarChart data={skillGraph.skillGraphData}>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent />}
+                      />
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="subject" />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                      <Radar
+                        name="Importance"
+                        dataKey="value"
+                        stroke="hsl(var(--chart-1))"
+                        fill="hsl(var(--chart-1))"
+                        fillOpacity={0.6}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -159,32 +173,30 @@ export default function SkillTreePage() {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
-                No skills in your profile yet.
-              </p>
+                <div className="text-sm text-muted-foreground text-center p-4 border rounded-lg">
+                 <p className="mb-2">Your skills aren't listed yet.</p>
+                 <Button size="sm" asChild>
+                    <Link href="/skill-profile">Complete Profile</Link>
+                 </Button>
+              </div>
             )}
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader>
-            <CardTitle className="font-headline text-lg">
-              Trending Roles
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {trendingRoles.map((role) => (
-                <div
-                  key={role}
-                  className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-muted"
-                >
-                  <span>{role}</span>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                </div>
-              ))}
-            </div>
-          </CardContent>
+            <CardHeader>
+                <CardTitle className="font-headline">What's Next?</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+                 <Button className="w-full justify-start" variant="ghost" asChild>
+                    <Link href="/career-paths"><ArrowRight className="mr-2"/> See matching career paths</Link>
+                </Button>
+                 <Button className="w-full justify-start" variant="ghost" asChild>
+                    <Link href="/learning-plan"><ArrowRight className="mr-2"/> Create a learning plan</Link>
+                </Button>
+                 <Button className="w-full justify-start" variant="ghost" asChild>
+                    <Link href="/simulator"><ArrowRight className="mr-2"/> Simulate learning a new skill</Link>
+                </Button>
+            </CardContent>
         </Card>
       </div>
     </div>
