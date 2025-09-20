@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/form";
 import { GitGraph, Wand2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUserProfileStore, type UserProfile, type SkillGraphData } from "@/store/user-profile";
+import { useUserProfileStore, type UserProfile, type GenerateSkillGraphOutput } from "@/store/user-profile";
 import { suggestCareerPaths } from "@/ai/flows/suggest-career-paths";
 import { generateSkillGraph } from "@/ai/flows/generate-skill-graph";
 import useStore from "@/hooks/use-store";
@@ -89,7 +89,7 @@ export default function SkillProfilePage() {
       ]);
       
       setCareerPaths(pathsResult);
-      setSkillGraph(graphResult.skillGraphData);
+      setSkillGraph(graphResult);
 
       toast({
         title: "Profile Updated!",
@@ -212,9 +212,9 @@ export default function SkillProfilePage() {
                   Update your profile to generate your Skill Graph.
                 </p>
               )}
-              {skillGraph && (
+              {skillGraph && skillGraph.skillGraphData && (
                 <ResponsiveContainer width="100%" height={350}>
-                    <RadarChart data={skillGraph}>
+                    <RadarChart data={skillGraph.skillGraphData}>
                       <PolarGrid />
                       <PolarAngleAxis dataKey="subject" />
                       <PolarRadiusAxis angle={30} domain={[0, 100]} />
