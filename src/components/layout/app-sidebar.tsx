@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  SidebarProvider,
   Sidebar,
   SidebarHeader,
   SidebarContent,
@@ -47,59 +46,57 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <div className="flex items-center gap-2 p-2">
-            <Compass className="text-primary h-8 w-8" />
-            <h1 className="text-xl font-headline font-bold">Career Compass</h1>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                <Link href={item.href} legacyBehavior passHref>
-                  <SidebarMenuButton
-                    isActive={pathname === item.href}
-                    tooltip={{ children: item.label, side: "right" }}
-                  >
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          <Separator className="my-2" />
-          <div className="p-4 flex items-center gap-3">
-             <Avatar>
-                <AvatarImage src="https://picsum.photos/seed/1/40/40" data-ai-hint="person face" />
-                <AvatarFallback>JD</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-                <span className="font-semibold text-sm">Jane Doe</span>
-                <span className="text-xs text-muted-foreground">jane.doe@example.com</span>
-            </div>
-          </div>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: "Settings", side: "right" }}>
-                <Settings />
-                <span>Settings</span>
-              </SidebarMenuButton>
+    <Sidebar>
+      <SidebarHeader>
+        <div className="flex items-center gap-2 p-2">
+          <Compass className="text-primary h-8 w-8" />
+          <h1 className="text-xl font-headline font-bold">Career Compass</h1>
+        </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          {menuItems.map((item) => (
+            <SidebarMenuItem key={item.label}>
+              <Link href={item.href}>
+                <SidebarMenuButton
+                  isActive={pathname === item.href}
+                  tooltip={{ children: item.label, side: "right" }}
+                >
+                  <item.icon />
+                  <span>{item.label}</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <SidebarMenuButton tooltip={{ children: "Log out", side: "right" }}>
-                <LogOut />
-                <span>Log out</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-    </SidebarProvider>
+          ))}
+        </SidebarMenu>
+      </SidebarContent>
+      <SidebarFooter>
+        <Separator className="my-2" />
+        <div className="p-4 flex items-center gap-3">
+           <Avatar>
+              <AvatarImage src="https://picsum.photos/seed/1/40/40" data-ai-hint="person face" />
+              <AvatarFallback>JD</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+              <span className="font-semibold text-sm">Jane Doe</span>
+              <span className="text-xs text-muted-foreground">jane.doe@example.com</span>
+          </div>
+        </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip={{ children: "Settings", side: "right" }}>
+              <Settings />
+              <span>Settings</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton tooltip={{ children: "Log out", side: "right" }}>
+              <LogOut />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
