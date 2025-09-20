@@ -101,27 +101,29 @@ export default function LearningPlanPage() {
           const status = stepStatuses[step.skill] || "Not Started";
           return (
             <AccordionItem value={`item-${index}`} key={step.skill} className="bg-card border rounded-lg mb-4">
-              <AccordionTrigger className="p-6 hover:no-underline">
-                <div className="flex items-center gap-4 w-full">
-                  <CheckCircle2 className={`h-6 w-6 transition-colors ${status === "Completed" ? 'text-green-500' : 'text-muted-foreground'}`} />
-                  <div className="text-left flex-1">
-                    <h3 className="font-headline text-lg">{step.skill}</h3>
-                    <p className="text-sm text-muted-foreground">{step.description}</p>
+              <div className="flex items-center justify-between p-6">
+                 <AccordionTrigger className="p-0 hover:no-underline flex-1">
+                  <div className="flex items-center gap-4 w-full">
+                    <CheckCircle2 className={`h-6 w-6 transition-colors ${status === "Completed" ? 'text-green-500' : 'text-muted-foreground'}`} />
+                    <div className="text-left flex-1">
+                      <h3 className="font-headline text-lg">{step.skill}</h3>
+                      <p className="text-sm text-muted-foreground">{step.description}</p>
+                    </div>
                   </div>
-                  <div className="ml-auto flex items-center gap-4" onClick={(e) => e.stopPropagation()}>
-                    <Select value={status} onValueChange={(newStatus: StepStatus) => handleStatusChange(step.skill, newStatus)}>
-                      <SelectTrigger className="w-[140px]">
-                        <SelectValue placeholder="Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {STATUSES.map(s => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                </AccordionTrigger>
+                <div className="ml-auto flex items-center gap-4 pl-4" onClick={(e) => e.stopPropagation()}>
+                  <Select value={status} onValueChange={(newStatus: StepStatus) => handleStatusChange(step.skill, newStatus)}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUSES.map(s => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </AccordionTrigger>
+              </div>
               <AccordionContent className="p-6 pt-0">
                 <h4 className="font-semibold mb-3">Learning Resources</h4>
                 <div className="space-y-3">
