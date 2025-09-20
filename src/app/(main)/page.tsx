@@ -96,7 +96,9 @@ export default function DashboardPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-            <Button size="lg">Start Your Journey</Button>
+            <Button size="lg" asChild>
+              <Link href="/skill-profile">Start Your Journey</Link>
+            </Button>
         </CardContent>
       </Card>
       
