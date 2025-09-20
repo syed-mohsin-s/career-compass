@@ -28,19 +28,8 @@ import { GitGraph, Wand2, Loader2, TrendingUp, ThumbsUp, ThumbsDown } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfileStore, type UserProfile } from "@/store/user-profile";
 import { suggestCareerPaths } from "@/ai/flows/suggest-career-paths";
-import { generateSkillGraph } from "@/ai/flows/generate-skill-graph";
 import { analyzeSkills } from "@/ai/flows/analyze-skills";
 import useStore from "@/hooks/use-store";
-
-import {
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Tooltip,
-} from "recharts";
-import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 
@@ -49,14 +38,8 @@ const profileSchema = z.object({
   education: z.string().min(10, "Please provide more details about your education."),
   interests: z.string().min(3, "Please enter at least one interest."),
   experience: z.string().min(10, "Please provide more details about your work experience."),
+  goal: z.string().min(10, "Please describe your career goal."),
 });
-
-const chartConfig = {
-  value: {
-    label: "Proficiency",
-    color: "hsl(var(--primary))",
-  },
-} satisfies ChartConfig;
 
 export default function SkillProfilePage() {
   const { toast } = useToast();
@@ -65,8 +48,6 @@ export default function SkillProfilePage() {
   const storedProfile = useStore(useUserProfileStore, (state) => state.profile);
   const setProfile = useUserProfileStore((state) => state.setProfile);
   const setCareerPaths = useUserProfileStore((state) => state.setCareerPaths);
-  const skillGraph = useStore(useUserProfileStore, (state) => state.skillGraph);
-  const setSkillGraph = useUserProfileStore((state) => state.setSkillGraph);
   const skillAnalysis = useStore(useUserProfileStore, (state) => state.skillAnalysis);
   const setSkillAnalysis = useUserProfileStore((state) => state.setSkillAnalysis);
 
@@ -78,6 +59,7 @@ export default function SkillProfilePage() {
       education: "",
       interests: "",
       experience: "",
+      goal: "",
     },
     values: storedProfile || undefined, // ensures form is populated on mount
   });
@@ -86,24 +68,18 @@ export default function SkillProfilePage() {
     setIsLoading(true);
     setProfile(values);
     try {
-      const [pathsResult, graphResult, analysisResult] = await Promise.all([
+      const [pathsResult, analysisResult] = await Promise.all([
         suggestCareerPaths({
           skills: values.skills,
           education: values.education,
           interests: values.interests,
           experience: values.experience,
-        }),
-        generateSkillGraph({
-          skills: values.skills.split(",").map((s) => s.trim()),
-          education: values.education,
-          interests: values.interests,
-          workExperience: values.experience,
+          goal: values.goal,
         }),
         analyzeSkills({ skills: values.skills }),
       ]);
       
       setCareerPaths(pathsResult);
-      setSkillGraph(graphResult);
       setSkillAnalysis(analysisResult);
 
       toast({
@@ -164,6 +140,22 @@ export default function SkillProfilePage() {
                     </FormItem>
                   )}
                 />
+                 <FormField
+                  control={form.control}
+                  name="goal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Career Goal</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="e.g., Become a Senior AI Engineer at a top tech company in 5 years." {...field} />
+                      </FormControl>
+                       <FormDescription>
+                        Describe your primary career objective.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="interests"
@@ -208,86 +200,61 @@ export default function SkillProfilePage() {
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
               <GitGraph />
-              Your Skill Graph
+              Your Skill Analysis
             </CardTitle>
-            <CardDescription>
-              A visual representation of how your skills, experience, and interests connect.
+             <CardDescription>
+              An AI-powered analysis of your current skill set.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="w-full aspect-square bg-muted/50 rounded-lg flex items-center justify-center p-4 overflow-auto">
-              {isLoading && !skillGraph && (
-                 <div className="text-muted-foreground text-center">
+             {isLoading && !skillAnalysis && (
+                 <div className="text-muted-foreground text-center p-8">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                    <p>Generating your graph...</p>
+                    <p>Generating your analysis...</p>
                  </div>
               )}
-              {!isLoading && !skillGraph && (
-                <p className="text-muted-foreground text-center">
-                  Update your profile to generate your Skill Graph.
-                </p>
+              {!isLoading && !skillAnalysis && (
+                <div className="text-muted-foreground text-center p-8">
+                  <p>Update your profile to generate your skill analysis.</p>
+                </div>
               )}
-              {skillGraph && skillGraph.skillGraphData && (
-                <ChartContainer
-                  config={chartConfig}
-                  className="mx-auto aspect-square h-full w-full"
-                >
-                  <RadarChart data={skillGraph.skillGraphData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                    <Radar
-                      name="Skills"
-                      dataKey="value"
-                      stroke="hsl(var(--primary))"
-                      fill="hsl(var(--primary))"
-                      fillOpacity={0.6}
-                    />
-                     <Tooltip
-                      content={({ active, payload }) => (
-                        <ChartTooltipContent active={active} payload={payload} />
-                      )}
-                    />
-                  </RadarChart>
-                </ChartContainer>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-        {skillAnalysis && (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="font-headline">Skill Analysis</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
+            {skillAnalysis && (
+                <div className="space-y-6">
                     <div>
                         <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Future-Proof Index</h3>
-                        <div className="flex items-center gap-2">
-                            <Progress value={skillAnalysis.futureProofIndex || 0} className="w-[60%]" />
+                        <div className="flex items-center gap-4">
+                            <Progress value={skillAnalysis.futureProofIndex || 0} className="w-full" />
                             <span className="font-bold text-lg">{skillAnalysis.futureProofIndex || 'N/A'}<span className="text-sm text-muted-foreground">/100</span></span>
                         </div>
                     </div>
                     <Separator/>
-                    <div className="space-y-4">
-                        <div>
-                             <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><ThumbsUp className="h-4 w-4" /> Pros</h3>
-                             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                                {skillAnalysis.pros.map((pro, i) => <li key={i}>{pro}</li>)}
-                             </ul>
-                        </div>
-                        <div>
-                             <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><ThumbsDown className="h-4 w-4" /> Cons</h3>
-                             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                                {skillAnalysis.cons.map((con, i) => <li key={i}>{con}</li>)}
-                             </ul>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Card className="bg-green-500/10 border-green-500/20">
+                             <CardHeader className="pb-2">
+                                <CardTitle className="text-base font-headline flex items-center gap-2"><ThumbsUp className="h-5 w-5 text-green-500" /> Pros</CardTitle>
+                             </CardHeader>
+                             <CardContent>
+                                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                    {skillAnalysis.pros.map((pro, i) => <li key={i}>{pro}</li>)}
+                                 </ul>
+                            </CardContent>
+                        </Card>
+                         <Card className="bg-red-500/10 border-red-500/20">
+                             <CardHeader className="pb-2">
+                                <CardTitle className="text-base font-headline flex items-center gap-2"><ThumbsDown className="h-5 w-5 text-red-500" /> Cons</CardTitle>
+                             </CardHeader>
+                             <CardContent>
+                                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                    {skillAnalysis.cons.map((con, i) => <li key={i}>{con}</li>)}
+                                 </ul>
+                            </CardContent>
+                        </Card>
                     </div>
-                </CardContent>
-            </Card>
-        )}
+                </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
 }
-
-    

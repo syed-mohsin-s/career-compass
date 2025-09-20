@@ -18,6 +18,7 @@ const SuggestCareerPathsInputSchema = z.object({
   education: z.string().describe('The education level of the user.'),
   interests: z.string().describe('A comma separated list of the user interests.'),
   experience: z.string().describe('Description of the user work experience.'),
+  goal: z.string().describe('The user\'s primary career goal.'),
 });
 export type SuggestCareerPathsInput = z.infer<typeof SuggestCareerPathsInputSchema>;
 
@@ -36,7 +37,7 @@ const prompt = ai.definePrompt({
   name: 'suggestCareerPathsPrompt',
   input: {schema: SuggestCareerPathsInputSchema},
   output: {schema: SuggestCareerPathsOutputSchema},
-  prompt: `You are a career counselor who suggests possible career paths based on a user's skill profile.
+  prompt: `You are a career counselor who suggests possible career paths based on a user's skill profile and goals.
 
   Suggest 3-5 possible career paths based on the following information:
 
@@ -44,6 +45,9 @@ const prompt = ai.definePrompt({
   Education: {{{education}}}
   Interests: {{{interests}}}
   Experience: {{{experience}}}
+  Career Goal: {{{goal}}}
+
+  The career paths should align with the user's stated goal.
 
   Format the output as a JSON array of strings.`,
 });

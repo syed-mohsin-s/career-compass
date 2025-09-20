@@ -11,6 +11,7 @@ export interface UserProfile {
   education: string;
   interests: string;
   experience: string;
+  goal: string;
 }
 
 export type SkillGraphData = {
