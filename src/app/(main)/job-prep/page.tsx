@@ -6,12 +6,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  CardFooter,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { FileUp, Linkedin, Wand2, Loader2, Sparkles } from "lucide-react";
+import { FileUp, Linkedin, Wand2, Loader2, Sparkles, MapPin, Code2, GraduationCap } from "lucide-react";
 import { optimizeResumeAndLinkedIn, OptimizeResumeAndLinkedInOutput } from "@/ai/flows/optimize-resume-linkedin";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,7 +24,7 @@ export default function JobPrepPage() {
   const [activeTab, setActiveTab] = useState("resume");
 
   const handleOptimize = async () => {
-    if ((activeTab === 'resume' && !resume) || !jobDescription) {
+    if ((activeTab === 'resume' && !resume) || (activeTab === 'linkedin' && !linkedin) || !jobDescription) {
       toast({
         variant: "destructive",
         title: "Missing Information",
@@ -97,11 +96,13 @@ export default function JobPrepPage() {
                     onChange={(e) => setJobDescription(e.target.value)}
                   />
                 </div>
-                <Button className="w-full" onClick={handleOptimize} disabled={isLoading}>
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                   Optimize Now
-                </Button>
               </CardContent>
+              <CardFooter>
+                 <Button className="w-full" onClick={handleOptimize} disabled={isLoading}>
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
+                   Optimize Resume
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
           <TabsContent value="linkedin">
@@ -131,18 +132,20 @@ export default function JobPrepPage() {
                     onChange={(e) => setJobDescription(e.target.value)}
                   />
                 </div>
+              </CardContent>
+               <CardFooter>
                 <Button className="w-full" onClick={handleOptimize} disabled={isLoading}>
                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Wand2 className="mr-2 h-4 w-4" />}
-                   Optimize Now
+                   Optimize LinkedIn
                 </Button>
-              </CardContent>
+              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
         
         {isLoading && (
           <Card>
-            <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+            <CardContent className="p-6 flex flex-col items-center justify-center text-center min-h-[200px]">
               <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
               <h3 className="font-headline text-lg">Optimizing your profile...</h3>
               <p className="text-muted-foreground">The AI is working its magic. Please wait a moment.</p>
@@ -203,6 +206,40 @@ export default function JobPrepPage() {
                 You're a strong candidate! A few more tweaks will make you stand out.
             </p>
           </CardContent>
+        </Card>
+        <Card>
+            <CardHeader>
+                <CardTitle className="font-headline flex items-center gap-2"><MapPin/>Local Opportunities</CardTitle>
+                <CardDescription>Discover internships, hackathons, and scholarships near you.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-4 text-sm">
+                    <li className="flex items-start gap-3 p-2 rounded-md hover:bg-muted">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-md"><GraduationCap className="h-5 w-5 text-blue-500"/></div>
+                        <div>
+                           <span className="font-semibold">AI/ML Internship</span>
+                           <p className="text-muted-foreground text-xs">TechCorp - Mountain View, CA</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="ml-auto">View</Button>
+                    </li>
+                     <li className="flex items-start gap-3 p-2 rounded-md hover:bg-muted">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-md"><Code2 className="h-5 w-5 text-green-500"/></div>
+                         <div>
+                           <span className="font-semibold">Cloud Dev Hackathon</span>
+                           <p className="text-muted-foreground text-xs">Community Center - Sunnyvale, CA</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="ml-auto">Join</Button>
+                    </li>
+                    <li className="flex items-start gap-3 p-2 rounded-md hover:bg-muted">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-md"><GraduationCap className="h-5 w-5 text-purple-500"/></div>
+                         <div>
+                           <span className="font-semibold">Future of Tech Scholarship</span>
+                           <p className="text-muted-foreground text-xs">State University Foundation</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="ml-auto">Apply</Button>
+                    </li>
+                </ul>
+            </CardContent>
         </Card>
         <Card>
             <CardHeader>
