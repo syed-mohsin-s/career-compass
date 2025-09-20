@@ -68,7 +68,7 @@ const features = [
     bgColor: 'bg-indigo-950/20',
   },
   {
-    title: 'What-If Simulator',
+    title: 'Simulator',
     description: 'See the impact of learning a new skill.',
     icon: FlaskConical,
     href: '/simulator',
