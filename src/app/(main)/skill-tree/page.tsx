@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { GitGraph, CheckCircle, ArrowRight, Loader2, Info } from 'lucide-react';
+import { GitGraph, CheckCircle, ArrowRight, Loader2, Info, Briefcase, BookOpen, FlaskConical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,7 @@ import useStore from '@/hooks/use-store';
 import { generateJobSkillGraph, GenerateJobSkillGraphOutput } from '@/ai/flows/generate-job-skill-graph';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const trendingRoles = [
   'AI Specialist',
@@ -187,15 +188,32 @@ export default function SkillTreePage() {
                 <CardTitle className="font-headline">What's Next?</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-                 <Button className="w-full justify-start" variant="ghost" asChild>
-                    <Link href="/career-paths"><ArrowRight className="mr-2"/> See matching career paths</Link>
-                </Button>
-                 <Button className="w-full justify-start" variant="ghost" asChild>
-                    <Link href="/learning-plan"><ArrowRight className="mr-2"/> Create a learning plan</Link>
-                </Button>
-                 <Button className="w-full justify-start" variant="ghost" asChild>
-                    <Link href="/simulator"><ArrowRight className="mr-2"/> Simulate learning a new skill</Link>
-                </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                        <Link href="/career-paths"><Briefcase className="mr-2"/> View Career Paths</Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>See AI-suggested career paths</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                        <Link href="/learning-plan"><BookOpen className="mr-2"/> Generate Learning Plan</Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Create a personalized learning roadmap</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button className="w-full justify-start" variant="outline" asChild>
+                        <Link href="/simulator"><FlaskConical className="mr-2"/> Try the Simulator</Link>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Simulate learning a new skill</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </CardContent>
         </Card>
       </div>
