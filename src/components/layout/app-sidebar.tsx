@@ -39,7 +39,7 @@ const menuItems = [
   { href: "/job-prep", label: "Job Prep", icon: ClipboardList },
   { href: "/mock-interview", label: "Mock Interview", icon: MessageSquare },
   { href: "/skill-tree", label: "Skill Tree", icon: GitGraph },
-  { href: "/simulator", label: "What-If Simulator", icon: FlaskConical },
+  { href: "/simulator", label: "Simulator", icon: FlaskConical },
 ];
 
 export function AppSidebar() {
