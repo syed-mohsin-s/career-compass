@@ -32,13 +32,20 @@ export type GenerateSkillGraphInput = z.infer<
 /**
  * Output schema for the skill graph generation.
  */
+const SkillGraphNodeSchema = z.object({
+  subject: z.string(),
+  value: z.number(),
+  maxValue: z.number(),
+});
+
 const GenerateSkillGraphOutputSchema = z.object({
   skillGraphData: z
-    .string()
+    .array(SkillGraphNodeSchema)
     .describe(
-      'A string representation of the skill graph data, such as JSON or GraphML format.'
+      'An array of objects representing the skill graph data. Each object should have a subject (skill name), a value (proficiency), and a maxValue.'
     ),
 });
+
 
 export type GenerateSkillGraphOutput = z.infer<
   typeof GenerateSkillGraphOutputSchema
@@ -70,9 +77,13 @@ const generateSkillGraphPrompt = ai.definePrompt({
   Interests: {{{interests}}}
   Work Experience: {{{workExperience}}}
 
-  The output should be a string representation of the skill graph data, such as JSON or GraphML format.
-  Ensure that the generated graph data is valid and can be easily parsed by a graph visualization library.
-  Return only the skill graph data. No other explanation is needed.
+  The output should be a JSON array of objects. Each object should contain:
+  - "subject": The name of a skill category or a specific skill.
+  - "value": A score from 0-100 representing the user's estimated proficiency based on the provided info.
+  - "maxValue": The maximum value for the score, which should always be 100.
+  
+  Generate between 5 and 7 subjects for the graph.
+  Return only the JSON data. No other explanation is needed.
   `,
 });
 

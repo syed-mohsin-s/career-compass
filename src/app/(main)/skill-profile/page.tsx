@@ -14,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import {
   Form,
   FormControl,
@@ -26,10 +25,21 @@ import {
 } from "@/components/ui/form";
 import { GitGraph, Wand2, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUserProfileStore, type UserProfile } from "@/store/user-profile";
+import { useUserProfileStore, type UserProfile, type SkillGraphData } from "@/store/user-profile";
 import { suggestCareerPaths } from "@/ai/flows/suggest-career-paths";
 import { generateSkillGraph } from "@/ai/flows/generate-skill-graph";
 import useStore from "@/hooks/use-store";
+
+import {
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer,
+  Tooltip
+} from "recharts";
+import { ChartTooltipContent } from "@/components/ui/chart";
 
 const profileSchema = z.object({
   skills: z.string().min(3, "Please enter at least one skill."),
@@ -56,7 +66,7 @@ export default function SkillProfilePage() {
       interests: "",
       experience: "",
     },
-    values: storedProfile, // ensures form is populated on mount
+    values: storedProfile || undefined, // ensures form is populated on mount
   });
 
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
@@ -190,7 +200,7 @@ export default function SkillProfilePage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="w-full aspect-square bg-muted rounded-lg flex items-center justify-center p-4 overflow-auto">
+            <div className="w-full aspect-square bg-muted/50 rounded-lg flex items-center justify-center p-4 overflow-auto">
               {isLoading && !skillGraph && (
                  <div className="text-muted-foreground text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
@@ -203,7 +213,25 @@ export default function SkillProfilePage() {
                 </p>
               )}
               {skillGraph && (
-                 <pre className="text-xs whitespace-pre-wrap break-all">{skillGraph}</pre>
+                <ResponsiveContainer width="100%" height={350}>
+                    <RadarChart data={skillGraph}>
+                      <PolarGrid />
+                      <PolarAngleAxis dataKey="subject" />
+                      <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                      <Radar
+                        name="Skills"
+                        dataKey="value"
+                        stroke="hsl(var(--primary))"
+                        fill="hsl(var(--primary))"
+                        fillOpacity={0.6}
+                      />
+                       <Tooltip
+                        content={({ active, payload }) => (
+                          <ChartTooltipContent active={active} payload={payload} />
+                        )}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
               )}
             </div>
           </CardContent>

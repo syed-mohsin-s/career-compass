@@ -10,26 +10,28 @@ export interface UserProfile {
   experience: string;
 }
 
+export type SkillGraphData = {
+  subject: string;
+  value: number;
+  maxValue: number;
+};
+
+
 interface UserProfileState {
-  profile: UserProfile;
+  profile?: UserProfile;
   careerPaths: SuggestCareerPathsOutput | null;
   learningPlan: GenerateLearningRoadmapOutput | null;
-  skillGraph: string | null;
+  skillGraph: SkillGraphData[] | null;
   setProfile: (profile: UserProfile) => void;
   setCareerPaths: (paths: SuggestCareerPathsOutput | null) => void;
   setLearningPlan: (plan: GenerateLearningRoadmapOutput | null) => void;
-  setSkillGraph: (graph: string | null) => void;
+  setSkillGraph: (graph: SkillGraphData[] | null) => void;
 }
 
 export const useUserProfileStore = create<UserProfileState>()(
   persist(
     (set) => ({
-      profile: {
-        skills: '',
-        education: '',
-        interests: '',
-        experience: '',
-      },
+      profile: undefined,
       careerPaths: null,
       learningPlan: null,
       skillGraph: null,
