@@ -36,10 +36,9 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
-  ResponsiveContainer,
-  Tooltip
+  Tooltip,
 } from "recharts";
-import { ChartTooltipContent } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 
 const profileSchema = z.object({
   skills: z.string().min(3, "Please enter at least one skill."),
@@ -47,6 +46,13 @@ const profileSchema = z.object({
   interests: z.string().min(3, "Please enter at least one interest."),
   experience: z.string().min(10, "Please provide more details about your work experience."),
 });
+
+const chartConfig = {
+  value: {
+    label: "Proficiency",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
 
 export default function SkillProfilePage() {
   const { toast } = useToast();
@@ -213,25 +219,28 @@ export default function SkillProfilePage() {
                 </p>
               )}
               {skillGraph && skillGraph.skillGraphData && (
-                <ResponsiveContainer width="100%" height={350}>
-                    <RadarChart data={skillGraph.skillGraphData}>
-                      <PolarGrid />
-                      <PolarAngleAxis dataKey="subject" />
-                      <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                      <Radar
-                        name="Skills"
-                        dataKey="value"
-                        stroke="hsl(var(--primary))"
-                        fill="hsl(var(--primary))"
-                        fillOpacity={0.6}
-                      />
-                       <Tooltip
-                        content={({ active, payload }) => (
-                          <ChartTooltipContent active={active} payload={payload} />
-                        )}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
+                <ChartContainer
+                  config={chartConfig}
+                  className="mx-auto aspect-square h-full w-full"
+                >
+                  <RadarChart data={skillGraph.skillGraphData}>
+                    <PolarGrid />
+                    <PolarAngleAxis dataKey="subject" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                    <Radar
+                      name="Skills"
+                      dataKey="value"
+                      stroke="hsl(var(--primary))"
+                      fill="hsl(var(--primary))"
+                      fillOpacity={0.6}
+                    />
+                     <Tooltip
+                      content={({ active, payload }) => (
+                        <ChartTooltipContent active={active} payload={payload} />
+                      )}
+                    />
+                  </RadarChart>
+                </ChartContainer>
               )}
             </div>
           </CardContent>
