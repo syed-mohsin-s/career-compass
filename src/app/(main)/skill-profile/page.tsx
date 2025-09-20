@@ -24,7 +24,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { GitGraph, Wand2, Loader2, TrendingUp, ThumbsUp, ThumbsDown } from "lucide-react";
+import {
+  GitGraph,
+  Wand2,
+  Loader2,
+  TrendingUp,
+  ThumbsUp,
+  ThumbsDown,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfileStore, type UserProfile } from "@/store/user-profile";
 import { suggestCareerPaths } from "@/ai/flows/suggest-career-paths";
@@ -32,12 +39,22 @@ import { analyzeSkills } from "@/ai/flows/analyze-skills";
 import useStore from "@/hooks/use-store";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const profileSchema = z.object({
   skills: z.string().min(3, "Please enter at least one skill."),
-  education: z.string().min(10, "Please provide more details about your education."),
+  education: z
+    .string()
+    .min(10, "Please provide more details about your education."),
   interests: z.string().min(3, "Please enter at least one interest."),
-  experience: z.string().min(10, "Please provide more details about your work experience."),
+  experience: z
+    .string()
+    .min(10, "Please provide more details about your work experience."),
   goal: z.string().min(10, "Please describe your career goal."),
 });
 
@@ -48,9 +65,13 @@ export default function SkillProfilePage() {
   const storedProfile = useStore(useUserProfileStore, (state) => state.profile);
   const setProfile = useUserProfileStore((state) => state.setProfile);
   const setCareerPaths = useUserProfileStore((state) => state.setCareerPaths);
-  const skillAnalysis = useStore(useUserProfileStore, (state) => state.skillAnalysis);
-  const setSkillAnalysis = useUserProfileStore((state) => state.setSkillAnalysis);
-
+  const skillAnalysis = useStore(
+    useUserProfileStore,
+    (state) => state.skillAnalysis
+  );
+  const setSkillAnalysis = useUserProfileStore(
+    (state) => state.setSkillAnalysis
+  );
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -78,7 +99,7 @@ export default function SkillProfilePage() {
         }),
         analyzeSkills({ skills: values.skills }),
       ]);
-      
+
       setCareerPaths(pathsResult);
       setSkillAnalysis(analysisResult);
 
@@ -105,9 +126,12 @@ export default function SkillProfilePage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <CardHeader>
-                <CardTitle className="font-headline">Your Skill Profile</CardTitle>
+                <CardTitle className="font-headline">
+                  Your Skill Profile
+                </CardTitle>
                 <CardDescription>
-                  Provide your professional details to generate personalized career insights.
+                  Provide your professional details to generate personalized
+                  career insights.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -118,7 +142,10 @@ export default function SkillProfilePage() {
                     <FormItem>
                       <FormLabel>Skills</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Python, TensorFlow, Project Management" {...field} />
+                        <Input
+                          placeholder="e.g., Python, TensorFlow, Project Management"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         Enter your skills, separated by commas.
@@ -134,22 +161,28 @@ export default function SkillProfilePage() {
                     <FormItem>
                       <FormLabel>Education</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., B.S. in Computer Science, Stanford University" {...field} />
+                        <Textarea
+                          placeholder="e.g., B.S. in Computer Science, Stanford University"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                 <FormField
+                <FormField
                   control={form.control}
                   name="goal"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Career Goal</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="e.g., Become a Senior AI Engineer at a top tech company in 5 years." {...field} />
+                        <Textarea
+                          placeholder="e.g., Become a Senior AI Engineer at a top tech company in 5 years."
+                          {...field}
+                        />
                       </FormControl>
-                       <FormDescription>
+                      <FormDescription>
                         Describe your primary career objective.
                       </FormDescription>
                       <FormMessage />
@@ -163,7 +196,10 @@ export default function SkillProfilePage() {
                     <FormItem>
                       <FormLabel>Interests</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Natural Language Processing, Open Source" {...field} />
+                        <Input
+                          placeholder="e.g., Natural Language Processing, Open Source"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -176,7 +212,11 @@ export default function SkillProfilePage() {
                     <FormItem>
                       <FormLabel>Work Experience</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Describe your key roles and accomplishments." className="min-h-[120px]" {...field} />
+                        <Textarea
+                          placeholder="Describe your key roles and accomplishments."
+                          className="min-h-[120px]"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -202,55 +242,103 @@ export default function SkillProfilePage() {
               <GitGraph />
               Your Skill Analysis
             </CardTitle>
-             <CardDescription>
+            <CardDescription>
               An AI-powered analysis of your current skill set.
             </CardDescription>
           </CardHeader>
           <CardContent>
-             {isLoading && !skillAnalysis && (
-                 <div className="text-muted-foreground text-center p-8">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
-                    <p>Generating your analysis...</p>
-                 </div>
-              )}
-              {!isLoading && !skillAnalysis && (
-                <div className="text-muted-foreground text-center p-8">
-                  <p>Update your profile to generate your skill analysis.</p>
-                </div>
-              )}
+            {isLoading && !skillAnalysis && (
+              <div className="text-muted-foreground text-center p-8">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2" />
+                <p>Generating your analysis...</p>
+              </div>
+            )}
+            {!isLoading && !skillAnalysis && (
+              <div className="text-muted-foreground text-center p-8">
+                <p>Update your profile to generate your skill analysis.</p>
+              </div>
+            )}
             {skillAnalysis && (
-                <div className="space-y-6">
-                    <div>
-                        <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Future-Proof Index</h3>
-                        <div className="flex items-center gap-4">
-                            <Progress value={skillAnalysis.futureProofIndex || 0} className="w-full" />
-                            <span className="font-bold text-lg">{skillAnalysis.futureProofIndex || 'N/A'}<span className="text-sm text-muted-foreground">/100</span></span>
-                        </div>
-                    </div>
-                    <Separator/>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Card className="bg-green-500/10 border-green-500/20">
-                             <CardHeader className="pb-2">
-                                <CardTitle className="text-base font-headline flex items-center gap-2"><ThumbsUp className="h-5 w-5 text-green-500" /> Pros</CardTitle>
-                             </CardHeader>
-                             <CardContent>
-                                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                                    {skillAnalysis.pros.map((pro, i) => <li key={i}>{pro}</li>)}
-                                 </ul>
-                            </CardContent>
-                        </Card>
-                         <Card className="bg-red-500/10 border-red-500/20">
-                             <CardHeader className="pb-2">
-                                <CardTitle className="text-base font-headline flex items-center gap-2"><ThumbsDown className="h-5 w-5 text-red-500" /> Cons</CardTitle>
-                             </CardHeader>
-                             <CardContent>
-                                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                                    {skillAnalysis.cons.map((con, i) => <li key={i}>{con}</li>)}
-                                 </ul>
-                            </CardContent>
-                        </Card>
-                    </div>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4" /> Overall Future-Proof
+                    Index
+                  </h3>
+                  <div className="flex items-center gap-4">
+                    <Progress
+                      value={skillAnalysis.overallFutureProofIndex || 0}
+                      className="w-full"
+                    />
+                    <span className="font-bold text-lg">
+                      {skillAnalysis.overallFutureProofIndex || "N/A"}
+                      <span className="text-sm text-muted-foreground">
+                        /100
+                      </span>
+                    </span>
+                  </div>
                 </div>
+
+                {skillAnalysis.futureProofSkills && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mt-4 mb-2">
+                      Individual Skill Analysis
+                    </h3>
+                    <div className="space-y-3">
+                      <TooltipProvider>
+                        {skillAnalysis.futureProofSkills.map((item) => (
+                          <Tooltip key={item.skill}>
+                            <TooltipTrigger className="w-full text-left">
+                              <div className="space-y-1">
+                                <div className="flex justify-between text-sm font-medium">
+                                  <span>{item.skill}</span>
+                                  <span>{item.relevanceScore}/100</span>
+                                </div>
+                                <Progress value={item.relevanceScore} />
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="max-w-xs">{item.reasoning}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ))}
+                      </TooltipProvider>
+                    </div>
+                  </div>
+                )}
+
+                <Separator />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-green-500/10 border-green-500/20">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base font-headline flex items-center gap-2">
+                        <ThumbsUp className="h-5 w-5 text-green-500" /> Pros
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                        {skillAnalysis.pros.map((pro, i) => (
+                          <li key={i}>{pro}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-red-500/10 border-red-500/20">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base font-headline flex items-center gap-2">
+                        <ThumbsDown className="h-5 w-5 text-red-500" /> Cons
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                        {skillAnalysis.cons.map((con, i) => (
+                          <li key={i}>{con}</li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
             )}
           </CardContent>
         </Card>

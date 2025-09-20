@@ -24,12 +24,12 @@ export type SkillGraphData = {
 interface UserProfileState {
   profile?: UserProfile;
   careerPaths: SuggestCareerPathsOutput | null;
-  learningPlan: GenerateLearningRoadmapOutput | null;
+  learningPlan: (GenerateLearningRoadmapOutput & {roadmapTitle?: string}) | null;
   skillGraph: GenerateSkillGraphOutput | null;
   skillAnalysis: AnalyzeSkillsOutput | null;
   setProfile: (profile: UserProfile) => void;
   setCareerPaths: (paths: SuggestCareerPathsOutput | null) => void;
-  setLearningPlan: (plan: GenerateLearningRoadmapOutput | null) => void;
+  setLearningPlan: (plan: (GenerateLearningRoadmapOutput & {roadmapTitle?: string}) | null) => void;
   setSkillGraph: (graph: GenerateSkillGraphOutput | null) => void;
   setSkillAnalysis: (analysis: AnalyzeSkillsOutput | null) => void;
 }
@@ -54,5 +54,3 @@ export const useUserProfileStore = create<UserProfileState>()(
     }
   )
 );
-
-    
