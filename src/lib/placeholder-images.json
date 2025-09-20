@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "user-avatar-1",
+      "description": "User avatar for Jane Doe",
+      "imageUrl": "https://picsum.photos/seed/1/40/40",
+      "imageHint": "person face"
+    }
+  ]
 }
