@@ -12,14 +12,14 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const AnalyzeSkillsInputSchema = z.object({
+const AnalyzeSkillsInputSchema = z.object({
   skills: z
     .string()
     .describe('A comma-separated list of the user\'s skills.'),
 });
 export type AnalyzeSkillsInput = z.infer<typeof AnalyzeSkillsInputSchema>;
 
-export const AnalyzeSkillsOutputSchema = z.object({
+const AnalyzeSkillsOutputSchema = z.object({
   pros: z
     .array(z.string())
     .describe('A list of strengths/pros of the user\'s current skill set.'),
@@ -66,5 +66,4 @@ const analyzeSkillsFlow = ai.defineFlow(
     return output!;
   }
 );
-
     
