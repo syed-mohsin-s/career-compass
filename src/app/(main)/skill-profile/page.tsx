@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -23,11 +24,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { GitGraph, Wand2, Loader2 } from "lucide-react";
+import { GitGraph, Wand2, Loader2, TrendingUp, ThumbsUp, ThumbsDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUserProfileStore, type UserProfile, type GenerateSkillGraphOutput } from "@/store/user-profile";
+import { useUserProfileStore, type UserProfile } from "@/store/user-profile";
 import { suggestCareerPaths } from "@/ai/flows/suggest-career-paths";
 import { generateSkillGraph } from "@/ai/flows/generate-skill-graph";
+import { analyzeSkills } from "@/ai/flows/analyze-skills";
 import useStore from "@/hooks/use-store";
 
 import {
@@ -39,6 +41,8 @@ import {
   Tooltip,
 } from "recharts";
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 
 const profileSchema = z.object({
   skills: z.string().min(3, "Please enter at least one skill."),
@@ -63,6 +67,9 @@ export default function SkillProfilePage() {
   const setCareerPaths = useUserProfileStore((state) => state.setCareerPaths);
   const skillGraph = useStore(useUserProfileStore, (state) => state.skillGraph);
   const setSkillGraph = useUserProfileStore((state) => state.setSkillGraph);
+  const skillAnalysis = useStore(useUserProfileStore, (state) => state.skillAnalysis);
+  const setSkillAnalysis = useUserProfileStore((state) => state.setSkillAnalysis);
+
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -79,7 +86,7 @@ export default function SkillProfilePage() {
     setIsLoading(true);
     setProfile(values);
     try {
-      const [pathsResult, graphResult] = await Promise.all([
+      const [pathsResult, graphResult, analysisResult] = await Promise.all([
         suggestCareerPaths({
           skills: values.skills,
           education: values.education,
@@ -92,14 +99,16 @@ export default function SkillProfilePage() {
           interests: values.interests,
           workExperience: values.experience,
         }),
+        analyzeSkills({ skills: values.skills }),
       ]);
       
       setCareerPaths(pathsResult);
       setSkillGraph(graphResult);
+      setSkillAnalysis(analysisResult);
 
       toast({
         title: "Profile Updated!",
-        description: "Your career paths and skill graph have been generated.",
+        description: "Your career insights have been generated.",
       });
     } catch (error) {
       console.error(error);
@@ -194,7 +203,7 @@ export default function SkillProfilePage() {
           </Form>
         </Card>
       </div>
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2 space-y-6">
         <Card className="sticky top-20">
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
@@ -245,7 +254,40 @@ export default function SkillProfilePage() {
             </div>
           </CardContent>
         </Card>
+        {skillAnalysis && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Skill Analysis</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                    <div>
+                        <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Future-Proof Index</h3>
+                        <div className="flex items-center gap-2">
+                            <Progress value={skillAnalysis.futureProofIndex || 0} className="w-[60%]" />
+                            <span className="font-bold text-lg">{skillAnalysis.futureProofIndex || 'N/A'}<span className="text-sm text-muted-foreground">/100</span></span>
+                        </div>
+                    </div>
+                    <Separator/>
+                    <div className="space-y-4">
+                        <div>
+                             <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><ThumbsUp className="h-4 w-4" /> Pros</h3>
+                             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                {skillAnalysis.pros.map((pro, i) => <li key={i}>{pro}</li>)}
+                             </ul>
+                        </div>
+                        <div>
+                             <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><ThumbsDown className="h-4 w-4" /> Cons</h3>
+                             <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                {skillAnalysis.cons.map((con, i) => <li key={i}>{con}</li>)}
+                             </ul>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+        )}
       </div>
     </div>
   );
 }
+
+    
