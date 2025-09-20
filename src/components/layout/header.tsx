@@ -29,10 +29,10 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="flex h-16 items-center gap-4 border-b bg-card/50 px-4 md:px-6 sticky top-0 z-30">
+    <header className="flex h-20 items-center gap-4 border-b bg-card/50 px-4 md:px-6 sticky top-0 z-30 backdrop-blur-sm">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="md:hidden" />
-        <h1 className="font-headline text-lg font-semibold md:text-xl">
+        <h1 className="font-headline text-xl font-semibold md:text-2xl">
           {title}
         </h1>
       </div>
@@ -43,7 +43,7 @@ export function Header() {
             <Input
               type="search"
               placeholder="Search..."
-              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px] bg-background"
+              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px] bg-background/50"
             />
           </div>
         </form>
