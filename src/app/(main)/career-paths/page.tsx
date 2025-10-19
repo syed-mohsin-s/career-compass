@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,8 +12,7 @@ import {
   CardFooter
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, DollarSign, Loader2, Info } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+import { TrendingUp, DollarSign, Loader2, Info, Star } from "lucide-react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { predictFutureSkillRelevance } from "@/ai/flows/predict-future-skill-relevance";
 import { generateLearningRoadmap } from "@/ai/flows/generate-learning-roadmap";
 import { predictSalaryRange } from "@/ai/flows/predict-salary-range";
+import { StarRating } from "@/components/ui/star-rating";
 
 interface FutureProofIndex {
   score: number;
@@ -147,8 +148,8 @@ export default function CareerPathsPage() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <Progress value={futureProofIndexes[path]?.score || 0} className="w-[60%]" />
-                      <span className="font-bold text-lg">{futureProofIndexes[path]?.score || 'N/A'}<span className="text-sm text-muted-foreground">/100</span></span>
+                      <StarRating rating={Math.ceil((futureProofIndexes[path]?.score || 0) / 20)} />
+                       <span className="font-bold text-lg">{futureProofIndexes[path]?.score || 'N/A'}<span className="text-sm text-muted-foreground">/100</span></span>
                     </div>
                   )}
                </div>
