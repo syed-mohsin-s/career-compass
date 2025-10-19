@@ -10,9 +10,8 @@ import {
   CardTitle,
   CardFooter
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Zap, Loader2, Info } from "lucide-react";
+import { TrendingUp, DollarSign, Loader2, Info } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,10 +21,16 @@ import useStore from "@/hooks/use-store";
 import { useToast } from "@/hooks/use-toast";
 import { predictFutureSkillRelevance } from "@/ai/flows/predict-future-skill-relevance";
 import { generateLearningRoadmap } from "@/ai/flows/generate-learning-roadmap";
+import { predictSalaryRange } from "@/ai/flows/predict-salary-range";
 
 interface FutureProofIndex {
   score: number;
   loading: boolean;
+}
+
+interface SalaryPrediction {
+    range: string;
+    loading: boolean;
 }
 
 export default function CareerPathsPage() {
@@ -37,23 +42,34 @@ export default function CareerPathsPage() {
   const setLearningPlan = useUserProfileStore((state) => state.setLearningPlan);
 
   const [futureProofIndexes, setFutureProofIndexes] = useState<Record<string, FutureProofIndex>>({});
+  const [salaryPredictions, setSalaryPredictions] = useState<Record<string, SalaryPrediction>>({});
   const [generatingPlan, setGeneratingPlan] = useState<string | null>(null);
 
   useEffect(() => {
     if (careerPaths?.careerPaths) {
       const initialIndexes: Record<string, FutureProofIndex> = {};
+      const initialSalaries: Record<string, SalaryPrediction> = {};
+
       careerPaths.careerPaths.forEach(path => {
         initialIndexes[path] = { score: 0, loading: true };
+        initialSalaries[path] = { range: 'N/A', loading: true };
       });
+
       setFutureProofIndexes(initialIndexes);
+      setSalaryPredictions(initialSalaries);
 
       careerPaths.careerPaths.forEach(async (path) => {
         try {
-          const result = await predictFutureSkillRelevance({ skillOrJob: path, yearsInFuture: 5 });
-          setFutureProofIndexes(prev => ({ ...prev, [path]: { score: result.relevanceScore, loading: false } }));
+          const [relevance, salary] = await Promise.all([
+             predictFutureSkillRelevance({ skillOrJob: path, yearsInFuture: 5 }),
+             predictSalaryRange({ jobRole: path }),
+          ]);
+          setFutureProofIndexes(prev => ({ ...prev, [path]: { score: relevance.relevanceScore, loading: false } }));
+          setSalaryPredictions(prev => ({ ...prev, [path]: { range: salary.salaryRange, loading: false } }));
         } catch (error) {
-          console.error(`Failed to fetch future-proof index for ${path}`, error);
+          console.error(`Failed to fetch data for ${path}`, error);
           setFutureProofIndexes(prev => ({ ...prev, [path]: { score: 0, loading: false } }));
+          setSalaryPredictions(prev => ({ ...prev, [path]: { range: "N/A", loading: false } }));
         }
       });
     }
@@ -68,7 +84,7 @@ export default function CareerPathsPage() {
     try {
         const skillProfileSummary = `Skills: ${profile.skills}. Education: ${profile.education}. Interests: ${profile.interests}. Experience: ${profile.experience}`;
         const plan = await generateLearningRoadmap({ careerPath, skillProfile: skillProfileSummary });
-        setLearningPlan(plan);
+        setLearningPlan({...plan, roadmapTitle: careerPath});
         toast({ title: "Learning Plan Generated!", description: `Redirecting you to your plan for ${careerPath}.` });
         router.push('/learning-plan');
     } catch(error) {
@@ -83,7 +99,8 @@ export default function CareerPathsPage() {
     return (
       <div className="space-y-6">
         <Skeleton className="h-24 w-full" />
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <Skeleton className="h-[300px] w-full" />
           <Skeleton className="h-[300px] w-full" />
           <Skeleton className="h-[300px] w-full" />
         </div>
@@ -114,19 +131,19 @@ export default function CareerPathsPage() {
           Based on your profile, here are some career paths where you could excel.
         </p>
       </div>
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {careerPaths.careerPaths.map((path) => (
           <Card key={path} className="flex flex-col">
             <CardHeader>
                 <CardTitle className="font-headline text-xl">{path}</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 space-y-4">
-               <div>
+               <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2"><TrendingUp className="h-4 w-4" /> Future-Proof Index</h3>
                   {futureProofIndexes[path]?.loading ? (
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-3/5" />
-                      <Skeleton className="h-6 w-1/5" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-4/5" />
+                      <Skeleton className="h-6 w-3/5" />
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
@@ -135,6 +152,14 @@ export default function CareerPathsPage() {
                     </div>
                   )}
                </div>
+                <div className="space-y-2">
+                    <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-2"><DollarSign className="h-4 w-4" /> Estimated Salary</h3>
+                    {salaryPredictions[path]?.loading ? (
+                         <Skeleton className="h-6 w-1/2" />
+                    ) : (
+                        <p className="font-bold text-lg">{salaryPredictions[path]?.range || 'N/A'}</p>
+                    )}
+                </div>
             </CardContent>
             <CardFooter>
               <Button className="w-full" onClick={() => handleGeneratePlan(path)} disabled={generatingPlan === path}>
