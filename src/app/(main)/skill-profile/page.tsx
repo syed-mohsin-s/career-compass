@@ -191,12 +191,12 @@ export default function SkillProfilePage() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>Auto-fill from Resume</Label>
-                   <Input type="file" accept=".pdf,.doc,.docx,.txt" ref={fileInputRef} onChange={handleFileChange} className="hidden" id="resume-upload" disabled={isParsing} />
+                   <Input type="file" accept=".pdf,.txt" ref={fileInputRef} onChange={handleFileChange} className="hidden" id="resume-upload" disabled={isParsing} />
                    <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()} disabled={isParsing}>
                       {isParsing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
                        {isParsing ? "Parsing Resume..." : "Upload Resume"}
                    </Button>
-                   <FormDescription>Upload your resume to automatically fill in your skills, education, and experience.</FormDescription>
+                   <FormDescription>Upload your resume to automatically fill in your skills, education, and experience. (.pdf, .txt supported)</FormDescription>
                 </div>
 
                  <Separator />
@@ -413,5 +413,3 @@ export default function SkillProfilePage() {
     </div>
   );
 }
-
-    
