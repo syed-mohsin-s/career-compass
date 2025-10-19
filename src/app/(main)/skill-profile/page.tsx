@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,6 +31,7 @@ import {
   TrendingUp,
   ThumbsUp,
   ThumbsDown,
+  Upload,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfileStore, type UserProfile } from "@/store/user-profile";
@@ -45,6 +46,26 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { extractResumeInfo } from "@/ai/flows/extract-resume-info";
+
+
+const fileToDataURI = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            if (event.target?.result) {
+                resolve(event.target.result as string);
+            } else {
+                reject(new Error("Failed to read file."));
+            }
+        };
+        reader.onerror = (error) => {
+            reject(error);
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
 
 const profileSchema = z.object({
   skills: z.string().min(3, "Please enter at least one skill."),
@@ -61,6 +82,8 @@ const profileSchema = z.object({
 export default function SkillProfilePage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const storedProfile = useStore(useUserProfileStore, (state) => state.profile);
   const setProfile = useUserProfileStore((state) => state.setProfile);
@@ -119,6 +142,36 @@ export default function SkillProfilePage() {
     }
   };
 
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 4 * 1024 * 1024) { // 4MB limit
+        toast({ variant: "destructive", title: "File too large", description: "Please upload a file smaller than 4MB." });
+        return;
+      }
+      setIsParsing(true);
+      try {
+        const dataUri = await fileToDataURI(file);
+        const extractedData = await extractResumeInfo({ resumeDataUri: dataUri });
+
+        form.setValue("skills", extractedData.skills);
+        form.setValue("education", extractedData.education);
+        form.setValue("experience", extractedData.experience);
+
+        toast({ title: "Resume Parsed", description: "Your profile information has been pre-filled." });
+      } catch (error) {
+        console.error(error);
+        toast({ variant: "destructive", title: "Parsing Failed", description: "Could not extract information from the resume." });
+      } finally {
+        setIsParsing(false);
+        // Reset file input
+        if(fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    }
+  };
+
   return (
     <div className="grid gap-6 lg:grid-cols-5">
       <div className="lg:col-span-3 space-y-6">
@@ -135,6 +188,19 @@ export default function SkillProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Auto-fill from Resume</Label>
+                   <Input type="file" accept=".pdf,.doc,.docx,.txt" ref={fileInputRef} onChange={handleFileChange} className="hidden" id="resume-upload" disabled={isParsing} />
+                   <Button variant="outline" className="w-full" onClick={() => fileInputRef.current?.click()} disabled={isParsing}>
+                      {isParsing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+                       {isParsing ? "Parsing Resume..." : "Upload Resume"}
+                   </Button>
+                   <FormDescription>Upload your resume to automatically fill in your skills, education, and experience.</FormDescription>
+                </div>
+
+                 <Separator />
+
+
                 <FormField
                   control={form.control}
                   name="skills"
@@ -222,7 +288,7 @@ export default function SkillProfilePage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading || isParsing}>
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (

@@ -16,5 +16,6 @@ import '@/ai/flows/career-path-recommendations.ts';
 import '@/ai/flows/learning-resource-aggregation.ts';
 import '@/ai/flows/analyze-skills.ts';
 import '@/ai/flows/generate-job-skill-graph.ts';
+import '@/ai/flows/extract-resume-info.ts';
 
     
