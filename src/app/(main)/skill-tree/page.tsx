@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { GitGraph, CheckCircle, ArrowRight, Loader2, Info, Briefcase, BookOpen, FlaskConical } from 'lucide-react';
+import { GitGraph, CheckCircle, XCircle, ArrowRight, Loader2, Info, Briefcase, BookOpen, FlaskConical } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -86,11 +86,19 @@ export default function SkillTreePage() {
     fetchSkillGraph();
   }, [selectedRole, toast]);
 
-  const userSkills = profile?.skills?.split(',').map((s) => s.trim()) || [];
+  const userSkills = profile?.skills?.toLowerCase().split(',').map((s) => s.trim()) || [];
+  
+  const requiredSkills = skillGraph?.skillGraphData.map(s => s.subject.toLowerCase()) || [];
+
+  const skillGaps = requiredSkills.map(skill => ({
+    name: skill,
+    known: userSkills.includes(skill)
+  }));
+
 
   return (
     <div className="grid gap-6 md:grid-cols-3">
-      <div className="md:col-span-2">
+      <div className="md:col-span-2 space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline flex items-center gap-2">
@@ -154,6 +162,25 @@ export default function SkillTreePage() {
             </div>
           </CardContent>
         </Card>
+        
+        {skillGaps.length > 0 && (
+             <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">Skill Gap Analysis</CardTitle>
+                    <CardDescription>Comparison of your skills against the requirements for a {selectedRole}.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                        {skillGaps.map(skill => (
+                            <Badge key={skill.name} variant={skill.known ? "success" : "outline"} className="capitalize">
+                                {skill.known ? <CheckCircle className="h-3 w-3 mr-1.5" /> : <XCircle className="h-3 w-3 mr-1.5" />}
+                                {skill.name}
+                            </Badge>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        )}
       </div>
 
       <div className="space-y-6">
@@ -166,10 +193,9 @@ export default function SkillTreePage() {
           <CardContent>
             {userSkills.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {userSkills.map((skill) => (
+                {profile?.skills?.split(',').map((skill) => (
                   <Badge key={skill} variant="secondary">
-                    <CheckCircle className="w-3 h-3 mr-1" />
-                    {skill}
+                    {skill.trim()}
                   </Badge>
                 ))}
               </div>
